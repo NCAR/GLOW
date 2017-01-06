@@ -3,7 +3,7 @@ The GLobal airglOW Model
 
 This directory contains:
    Fortran-90 source code files,
-   Makefile,
+   Makefiles,
    Example input and output files,
    Example job script,
    Subdirectory data/ contains input data files,
