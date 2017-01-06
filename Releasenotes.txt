@@ -1,0 +1,141 @@
+This directory contains a pre-release beta of GLOW version 0.98
+as of 1/3/2017.  Proceed at your own risk.
+
+------------------------------------------------
+
+Version 0.98 release notes, Stan Solomon, 1/2017
+
+See Quickstart.txt for very basic instructions
+See Glow.txt for more details
+See Glowlicense.txt for the Open Source Academic Research License Agreement
+
+This is now a Fortran-90 code, with MPI and netCDF options
+  No more common blocks.
+  Use-associated variables are defined in module cglow.f90
+  Most code converted to lower-case free-form style
+Example driver program glowbasic provides functionality in previous versions
+  Can run one profile at a time or loop
+  Single-processor, no MPI required
+  No netCDF required either
+  You can easily modify this program to suit particular applications
+New driver program glowdriver uses TIE-GCM, TIME-GCM or empirical model inputs
+  Ultimately this will include WACCM-X as well
+  Fully MPI code with user-specified number of processors
+  Namelist input from file in.namelist
+  netCDF output to a file specified in the namelist input
+Can still run with empirical models:
+  Default empirical neutral model updated to MSIS-2K
+  NOEM empirical nitric oxide model, based on SNOE data, used for empirical runs
+  IRI-90 still used for empirical ionosphere
+
+New features in v. 0.98:
+  Most of the new things in v. 0.98 are computational, not scientific.
+  Move to MPI parallel processing forced the elimination of common blocks.
+  Reads netCDF input files from GCMs, and writes global netCDF output files.
+  All of this is optional - can still run the model the "old" way.
+    (But old driver programs will have to be updated to use shared variables.)
+  Empirical model calls consolidated in subroutine MZGRID
+  Calculates conductivities using Ryan McGranaghan's CONDUCT routine (adapted).
+  N2 LBH, O 1356, N 1493, O 1304 added to airglow output (ZETA array).
+    (Note 1493 is very approximate since branching rations are poorly known.)
+  Radiative recombination and mutual neutralization included in 1356.
+  Subroutine BANDS added to allocate LBH among v' levels.
+    (Really just a stub now, will ultimately handle vibrational distributions.)
+
+Other significant changes:
+
+   The quartic equation solver formerly used by GCHEM to calculate electron
+density has been abandoned because it produced minor errors and could not
+be verified.  Instead, a simple iterative method is used, which turns out
+to be more accurate and equally fast.
+
+   The high-energy electron precipitation example (hexexample) is no longer
+provided.  This functionality is built-in to the codes, but if you want to
+do a high-energy electron run you will have to increase NBINS in cglow.f90
+(e.g., to 343 for energies up to 100 MeV) and extend the altitude grid to
+lower altitude by increasing JMAX.
+
+   Conjugate hemisphere photoelectrons are no longer provided in the example
+drivers, since they are very minor, triple the run time, and weren't widely
+used.  They can easily be re-installed in a driver program, but note that
+the magnetic field needs to be updated.  The calculation is fairly approximate
+anyway because it doesn't consider exosphere/plasmasphere attenuation of
+the electron flux.
+
+   The background ("night time") ionization rate calculated in QBACK was updated
+to conform to the forumlation now used in the TIE-GCM, TIME-GCM, and WACCM.
+It is still pretty approximate, but produces an ionosphere in the E and F1
+regions that is in reasonable agreement with observations.
+
+   Several unused artifacts were eliminated, but arrays PIA and SESPEC were
+retained in anticipation of including proton aurora ionization in the future.
+
+Known issues (most of these carried over from v. 0.97):
+  X-rays shortward of 18 A need to be re-examined and updated.
+  Magnetic field (GEOMAG, FIELDM) is out of date.  GEOMAG is only used by
+    the NOEM model, and isn't too different from the coordinate transform
+    used to generate SNOE data on a magnetic grid.  FIELDM only calculates
+    the dip angle, which has a minimual effect on results.  But these should
+    be updated to time-varying IGRF/Apex coordinates.
+  Temporary Y2K fix to SUNCOR.  Also should update to J2000 epoch.
+    Should be fine for 1950-2050, but really need to make if valid for either
+    yyddd to yyyyddd date format, which will extend the range of validity to
+    1900-2100.  (This only affects SZA.)
+  O(1S) needs to be re-evaluated (still).  Nightglow recombination source
+    still not included.  Also need to include O2 A-bands.
+  O(1S) from O2 dissociation (BSO2) is currently hardwired - only works with
+    LMAX=123 (although changes shortward of 800 A are OK).
+  IRI should be updated.  Usually, IRI is Only used for electron density above
+    200 km, and IRI hasn't changed much in the F-region, so it's OK for now.
+  7774 cascade to 1356 is reduced by 50%, which is probably reasonable, but
+    now 7774 and 1356 are not self-consistent.
+
+-------------------------------------------------
+
+Version 0.973 release notes, Stan Solomon, 3/2015
+
+Version 0.973 is an incremental release of GLOW, mostly just the example drivers
+  updates example drivers to MSIS-2K
+  adds NOEM empirical nitric oxide model, based on SNOE data, to example drivers
+  some cleanup of example drivers
+  fixs ssflux so it only reads file on first call (or if ISCALE changes).
+
+-------------------------------------------------
+
+Version 0.97 release notes, Stan Solomon, 4/2005
+
+New features:
+   Relativistic correction to electron impact cross sections included
+   Maxwellian or monoenergetic fluxes generated by MAXT
+   Possible to use any solar grid by changing only input files
+   Photoabsorption and photoionization cross sections supplied in files
+   SSFLUX completely re-written:
+      Model parameters supplied in files
+      Default is ~1 nm grid (5 nm in FUV)
+      Hinteregger model still there (ISCALE=0)
+      EUVAC also available (ISCALE=1)
+      User grid and input supported by changing input file and LMAX (ISCALE=2)
+   Common block CGLOW is unchanged
+      Should facilitate upgrade path for existing programs
+      But there are now several obsolete artifacts
+
+Issues addressed in v. 0.97:
+   Fixed two problems with Auger electron production
+   Fixed some small bugs in O(1S) calculation
+   Adjusted N(2D)+O rate coefficient to Fell et al. value (6.9e-13)
+   Adjusted C III on N2 cross section to fix O2 ionization rate problem
+   Removed various artifacts, including EAURI
+   Removed unnecessary N(2D) initial guess (now just set to zero)
+   Now use standard energy and altitude grid in both day and aurora examples
+
+Known issues:
+   X-rays shortward of 18 A need to be re-examined and updated.
+   Magnetic field (GEOMAG, FIELDM) is out of date, really need to update to 
+      IGRF, but at the resolutions typical here should be OK for now.
+   Temporary Y2K fix to SUNCOR.  Should be fine for 1950-2050, but really
+      need to change from yyddd to yyyyddd date format, which will enable
+      range of validity to extend from 1900-2100.  (This only affects SZA.)
+   O(1S) needs to be re-evaluated (still).
+   O(1S) from O2 dissociation (BSO2) is currently hardwired - only works with
+      LMAX=123 (although changes shortward of 800 A are OK).
+   IRI should be updated.

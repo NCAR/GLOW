@@ -1,0 +1,25 @@
+#! /bin/csh
+#
+#   input:    Namelist input file
+#   output:   Standard output file from model execution
+#   nproc:    Number of processors for 64-bit Linux MPI run
+#
+set input    = in.namelist
+set output   = out.log
+set nproc    = 6
+#
+# Namelist input file must exist:
+#
+if (! -f $input) then
+  echo ">>> Cannot find namelist input file $input <<<"
+  exit 1
+endif
+#
+set input    = ./$input
+set output   = ./$output
+set model    = ./glow.exe
+#
+mpirun -l -np $nproc $model < $input > $output
+#mpirun -np $nproc $model < $input > $output
+#
+exit 0

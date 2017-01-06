@@ -1,0 +1,426 @@
+                  Preliminary Documentation for the GLOW Model
+    
+                               Version 0.98
+
+               ***  see Releasenotes.txt for release notes  ***
+  
+                           Stan Solomon, 1/2017
+  
+   The GLobal airglOW (GLOW) model is a family of subroutines that calculates
+ionization and excitation rates, energetic electron production and transport,
+excited species densities, and airglow emission rates for the terrestrial
+thermosphere.  Use is governed by the Open Source Academic Research License
+Agreement contained in the file Glowlicense.txt.  Standards and practices are
+specified by the "rules of the road" adopted by the CEDAR and TIMED programs.  
+   Other than the example driver programs, the input files, Makefile, run
+script, and possibly the master subroutine glow.f90, it is inadvisable to modify
+the code.  If any changes are required, please suggest them to:
+  
+   Stan Solomon, HAO/NCAR, Boulder, CO 80301
+   Phone: 303-497-2179
+   Email: stans@ucar.edu
+  
+   Since this is a developmental code, there are bound to be problems which
+users will uncover.  Please let me know about them.  I will also attempt to
+accommodate any reasonable suggestions for enhancements or changes.  By
+following this procedure, users will benefit by staying compatible with future
+developments, and from a more systematic elimination of any progrmming errors.
+Also, please upgrade to the latest version.  Use of obsolete versions may lead
+to incorrect results.
+
+   The main inputs to GLOW are: neutral thermopshere major species density
+(O, O2, N2), minor species NO and N(4S), the electron density, the neutral,
+ion, and electron temperatures, all on a 1D altitude grid, for specified
+time and geographic coordinates.  Solar flux, and auroral electron flux, are
+specified or calculated from parameters.  Outputs include electron density
+calculated below 200 km, ionized and excited species density, airglow volume
+emisison rates, and vertical column brightnesses.  Various parameters used
+to calculate these are also available on output.  GLOW does not perform any
+transport calculations, so above 200 km, the electron density must be
+specified, since photochemical equilibrium is only valid to ~200 km altitude.
+There are several other options for specifying ionospheric parameters.  GLOW
+calculates dissociation rates, and will return N(2D), O(1D), etc., but not
+N(4S), NO, or O(3P), since they are subject to transport.
+  
+   Program glowbasic.f90 is provided to give some guidance in using
+the subroutine package, one profile at a time, similar to previous versions.
+It uses NRLMSISE-00 and IRI-90 to specify the neutral atmosphere and
+initial electron density profile, and the NOEM model to specify nitric oxide
+density.  This program is intended as an example to be modified by the user
+to suit particular purposes.  It is not necessary to use MSIS, IRI, and NOEM;
+any model or measurement that specifies neutral densities, temperatures, and
+high-altitude electron densities can be employed.  The output statements at the
+end are just examples of a small subset of the calculated parameters.
+To get started with glowbasic:
+   cp Makefile.glowbasic Makefile
+   gmake
+   glow.exe < in.basic.day > test.basic.day
+You don't need to use the Makefile or the input files, you can compile and
+link manually, and run with command-line input.
+You can also run glowbasic out of IDL using:
+   spawn, '.glow.exe < input.file > output.file'
+
+   Program glowdriver.f90 is a parallel processing program set up to use output
+from general circulation models such as the NCAR TIE-GCM and TIME-GCM to
+specify the neutral densities, electron density, and temperatures, and then
+calculate airglow emissions globally on the GCM grid.  It uses
+netCDF files for input and output.  It can also be run globally using MSIS/IRI
+inputs.  Solar and auroral parameters are taken from the GCM histories when
+running in GCM mode, and can be supplied by the user when in empirical mode,
+although there is no way to provide auroral spatial distributions at this time,
+so these would generally be omitted when using empirical model inputs.
+To use glowdriver:
+   cp Makefile.glowdriver Makefile
+   gmake
+   runglow.job
+You don't need to use the runglow.job script, you can use mpirun from the
+command line.  The script is set up to use 6 processors, input from the
+file in.namelist, netCDF output to a file specified by the namelist inputs,
+and log messages to the file out.log.  The script can easily be edited to
+change these.  
+  
+   Subroutine GLOW is the master routine of the package.  It receives input
+parameters from the calling program use associated through module CGLOW, calls
+the other subroutines, and returns results through use associatedvariables.  Iti
+is not necessary to use subroutine GLOW to call the others - those particularly
+bold and well-informed users who desire to use some subset of the package
+may attempt to do so, using subroutine GLOW as guidance. 
+
+   The data files ephoto_x*.dat, ssflux_*.dat, and snoem_eof.dat are provided in
+subdirectory data/ of the working directory.  Parameter files for IRI-90 are
+provided in data/iri90/.  These files can put put in any directory as long as
+their paths are correctly specified in the driver program or its namelist
+inputs.  The number of wavelenth bins in the ephoto and ssflux files must equal
+the parameter LMAX specified in module CGLOW, and the wavelength ranges must be
+the same in all input files.
+  
+   These routines are written in standard Fortran-90 and MPI, and should be
+compatible with most compilers.  However, their performace has only been tested
+using the Intel ifort compiler with -O3 optimization running under CentOS Linux
+on 64-bit machines.  The Portland Group compiler should also work but I haven't
+been using it lately since ifort is faster.  I would be interested in hearing
+of experiences with other compilers and/or operating systems, but make no claims
+or promises.  To use with the glowdriver program, MPI and netCDF libraries must
+be installed.  However, glowbasic shouldn't require anything other than Fortran.
+  
+Subroutines called by the example programs include:
+  MPI*       Message-passing interface utilities
+  CGLOW_INIT Initializes array dimensions and shared variables in module CGLOW
+               (This takes the place of common blocks previously employed)
+  EGRID      sets up electron energy grid   
+  READ_TGCM  Reads GCM model history files and returns fields on GCM grid
+  TZGRID     Interpolates GCM fields onto H/4 altitude grid
+  MZGRID     Returns empirical model quantities on a default altitude grid
+  GTD7       NRL Mass Spectrometer Incoherent Scatter - 00 (NRLMSISE-00) model
+               (Picone et al., 2002)
+  TSELEC     Set-up entry for MSIS-00
+  IRI90      International Reference Ionosphere-1990 (IRI-90) model
+              (Belitza, 1990)
+              (Note: a special modification of the original code is provided.)
+  SNOEMINT   Interpolates NO output onto model grid
+  SNOEM      Implementation of Nitric Oxide Empirical Model (NOEM)i
+               (Marsh et al., 2005)
+  GEOMAG     Translates geographic to geomagnetic coordinates and vice versa
+  MAXT       Generates a Maxwellian electron spectrum
+  GLOW       Master subroutine of the GLOW package
+  CONDUCT    Calculates ionospheric Hall and Pederson conductivities
+               (McGranaghan et al., 2016)
+  OUTPUT     Writes global netCDF output files, similar to GCM histories
+  
+Subroutines called by GLOW are:
+  FIELDM  calculates magnetic dip angle
+  SOLZEN  calculates solar zenith angle
+  SSFLUX  scales solar flux for activity level
+  RCOLUM  calculates slant column density of major species
+  EPHOTO  calculates photoionization and photoelectron production
+  QBACK   estimates background ionization
+  ETRANS  computes electron transport, ionization, excitation using
+            Nagy & Banks 2-stream method
+            calls EXSECT for cross-sections, first call only
+  GCHEM   finds electron/ion/metastable densities, airglow emissions
+  BANDS   calculates band-specific airglow emission rates (currently only LBH)
+  
+Definitions:
+  
+! Array dimensions:
+! JMAX    number of altitude levels
+! NBINS   number of energetic electron energy bins
+! LMAX    number of wavelength intervals for solar flux
+! NMAJ    number of major species
+! NST     number of states produced by photoionization/dissociation
+! NEI     number of states produced by electron impact
+! NEX     number of ionized/excited species
+! NW      number of airglow emission wavelengths
+! NC      number of component terms for each emission
+  
+! Supplied to subroutine using use-associated data defined in module CGLOW:
+! IDATE   Date, in form yyddd
+! UT      Universal Time; seconds
+! GLAT    Geographic latitude; degrees
+! GLONG   Geographic longitude; degrees
+! ISCALE  Solar flux scaling switch, see subroutine SSFLUX
+! JLOCAL  =0 for electron transport calculation, =1 for local calc only
+! KCHEM   Ion/electron chemistry switch, see subroutine GCHEM
+! F107    Solar 10.7 cm flux for day being modeled, 1.E-22 W m-2 Hz-1
+! F107A   Solar 10.7 cm flux 81-day centered average
+! XUVFAC  Factor by which to multiply to solar flux 16-250 A or 16-50 A.
+! ZZ      altitude array; cm
+! ZO      O number density at each altitude; cm-3
+! ZN2     N2  "      "      "   "     "       "
+! ZO2     O2         "
+! ZNO     NO         "
+! ZNS     N(4S)      "
+! ZND     N(2D)      "
+! ZRHO    mass density at each altitude; gm cm-3 (not currently in use)
+! ZE      electron density at each alt; cm-3
+! ZTN     neutral temperature at each alt; K
+! ZTI     ion temperature at each alt; K
+! ZTE     electron temp at each alt; K
+! PHITOP  energetic electron flux into top of atmosphere; cm-2 s-1 eV-1
+
+! Calculated by subroutine and returned in variables  defined in module CGLOW:
+! SZA     solar zenith angle; radians
+! DIP     magnetic field dip angle; radians
+! EFRAC   energy conservation check from ETRANS, (out-in)/in
+! IERR    error code returned from ETRANS:
+!           0=normal, 1=local problem, 2=transport problem
+! ZMAJ    major species density array, O, O2, N2; cm-3
+! ZCOL    major species slant column density array, O, O2, N2; cm-2
+! WAVE1   longwave edge of solar flux wavelength range; A
+! WAVE2   shortwave edge of solar flux wavelength range; A
+! SFLUX   scaled solar flux in each wavelength range; photons cm-2 s-1
+! ENER    electron energy grid; eV
+! DEL     width of each bin in electron energy grid; eV
+! PESPEC  photoelectron production rate at energy, altitude; cm-3 s-1
+! PIA     proton aurora ionization rate (not currently in use); cm-3 s-1.
+! SESPEC  proton aurora secondary electron production rate (not currently in use); cm-3 s-1
+! PHOTOI  photoionization rates for state, species, altitude; cm-3 s-1
+!           O+ states: 4S, 2Do, 2Po, 4Pe, 2Pe
+!           O2+ states: X, a+A, b, dissoc.
+!           N2+ states: X, A, B, C, F, dissoc.
+! PHOTOD  photodissoc. & exc. rates for state, species, alt.; cm-3 s-1
+!           (1,2,J) = O2 -> O(3P) + O(1D))
+!           (2,2,J) = O2 -> O(3P) + O(1S)
+!           (1,3,J) = N2 -> N + N
+! PHONO   photoionization/dissociation/excitation rates for NO, cm-3 s-1
+!         (1,J) = NO+ from H Ly-a ionization
+! SION    electron impact ionization rates calculated by ETRANS; cm-3 s-1
+! UFLX    upward hemispherical electron flux; cm-2 s-1 eV-1
+! DFLX    downward hemispherical electron flux; cm-2 s-1 eV-1
+! AGLW    Electron impact exc. rates; state, species, alt.; cm-3 s-1
+!           O states: 1D, 1S, 5S, 3S, 3p5P, 3p3P, 3d3D, 3s'3D
+!           O2 states: a, b, (A+A'+c), B(SRC), 9.9eV, Ryds., vib.
+!           N2 states: (A+B+W), B', C, (a+a'+w), 1Pu, b', Ryds., vib.
+! EHEAT   ambient electron heating rate, eV cm-3 s-1
+! TEZ     total energetic electron energy deposition, eV cm-3 s-1
+! TPI     total photoionization rate at each altitude, cm-3 s-1
+! TEI     total electron impact ionization rate at each altitude, cm-3 s-1
+! TIR     total ionization rate at each altitude (TPI+TEI), cm-3 s-1
+! ECALC   electron density, calculated below 200 km, a priori above; cm-3
+! ZXDEN   array of ionized/excited state densities at each altitude; cm-3:
+!           O+(2P), O+(2D), O+(4S), N+, N2+, O2+, NO+, N2(A), N(2P),
+!           N(2D), O(1S), O(1D); cm-3
+! ZETA    array of volume emission rates at each altitude; cm-3 s-1:
+!           3371A, 4278A, 5200A, 5577A, 6300A, 7320A, 10400A, 3466A,
+!           7774A, 8446A, 3726A, LBH, 1356, 1493, 1304; cm-3 s-1
+! VCB     array of vertical column brightnesses (as above); Rayleighs
+! ZCETA   array of contributions to each v.e.r at each alt; cm-3 s-1:
+! ZCETA(*,1,z): N2(C) 2nd positive (0,0) band at 3371A:
+!   1: electron impact excitation N2 + e* -> N2(C)
+!   2: underlying N2(A) VK (0,9) band
+! ZCETA(*,2,z): N2+(B) 1st positive (0,1) band at 4278A:
+!   1: electron impact ionizing excitation N2 + e* -> N2+(B)
+!   2: photoionizing excitation N2 + hv -> N2+(B)
+!   3: resonant fluroescence N2+ + hv -> N2+(B)
+! ZCETA(*,3,z): N(2D) line at 5200A:
+!   1: photodissociation N2 + hv -> N + N(2D)
+!   2: photodissociative ionization N2 + hv -> N+ + N(2D)
+!   3: electron imact dissociation N2 + e* -> N + N(2D)
+!   4: electron impact dissociative ionization N2 + e* -> N+ + N(2D)
+!   5: dissociative recombination NO+ + e -> N + N(2D)
+!   6: dissociative recombination N2+ + e -> N + N(2D)
+!   7: atom-ion interchange N2+ + O -> NO+ + N(2D)
+!   8: quenching N(2P) + O -> N(2D) + O
+!   9: radiational cascade N(2P) -> N(2D) + hv
+! ZCETA(*,4,z): O(1S) "green" line at 5577A:
+!   1: electron impact excitation O + e* -> O(1S)
+!   2: dissociative recombination O2+ + e -> O + O(1S)
+!   3: energy transfer N2(A) + O -> N2 + O(1S)
+!   4: atom-ion interchange O2+ + N -> NO+ + O(1S)
+!   5: chemiluminescence N(2D) + NO -> N2 + O(1S)
+!   6: photodissociation O2 + hv -> O + O(1S)
+! ZCETA(*,5,z): O(1D) "red" line at 6300A:
+!   1: electron impact excitation O + e* -> O(1D) 
+!   2: thermal electron excitation O + e -> O(1D)
+!   3: dissociative recombination O2+ + e -> O + O(1D)
+!   4: chemiluminescence N(2D) + O2 -> NO + O(1D)
+!   5: energy transfer N(2D) + O -> N + O(1D)
+!   6: atom-ion interchange N+ + O2 -> NO+ + O(1D)
+!   7: energy transfer O+(2D) + O -> O+ + O(1D)
+!   8: electron impact dissociation O2 + e* -> O + O(1D)
+!   9: photodissociation O2 + hv -> O + O(1D)
+!  10: radiative cascade O(1S) -> O(1D) + hv
+! ZCETA(*,6,z): O+(2P) line at 7320A:
+!   1: photoionization O + hv -> O+(2P)
+!   2: photodissociative ionization O2 + hv -> O + O+(2P)
+!   3: electron impact ionization O + e* -> O+(2P)
+!   4: electron impact dissociative ionization O2 + e* -> O + O+(2P)
+! ZCETA(*,7,z): N(2P) line at 10400A:
+!   1: photodissociation N2 + hv -> N + N(2P)
+!   2: photodissociative ionization N2 + hv -> N+ + N(2P)
+!   3: electron imact dissociation N2 + e* -> N + N(2P)
+!   4: dissociative recombination N2+ + e -> N + N(2P)
+! ZCETA(*,8,z): N(2P) line at 3644A:
+!   1: photodissociation N2 + hv -> N + N(2P)
+!   2: photodissociative ionization N2 + hv -> N+ + N(2P)
+!   3: electron imact dissociation N2 + e* -> N + N(2P)
+!   4: dissociative recombination N2+ + e -> N + N(2P)
+! ZCETA(*,9,z): O(3p5P) line at 7774A:
+!   1: electron impact excitation O + e* -> O(3p5P)
+!   2: radiative recombination O+ + e -> O(3p5P)
+!   3: mutual neutralization O+ + O- -> O(3p5P)
+! ZCETA(*,10,z): O(3p3P) line at 8446A:
+!   1: electron impact excitation O + e* -> O(3p3P)
+!   2: electron impact excitation and cascade O + e* -> O(3d3D) -> O(3p3P)
+!   3: electron impact excitation and cascade O + e* -> O(3s'3D) -> O(3s3P)
+! ZCETA(*,11,z): O+(2D) line at 3726A:
+!   1: photoionization O + hv -> O+(2D)
+!   2: photodissociative ionization O2 + hv -> O + O+(2D)
+!   3: electron impact ionization O + e* -> O+(2D)
+!   4: electron impact dissociative ionization O2 + e* -> O + O+(2D)
+!   5: quenching O+(2P) + e -> O+(2D) + e
+!   6: radiational cascade O+(2P) -> O+(2D) + hv
+! ZCETA(*,12,z): N2(a) LBH total band system
+!   1: electron impact excitation N2 + e* -> N2(a)
+! ZCETA(*,13,z): O(3s5S) doublet at 1356A
+!   1: electron impact excitation O + e* -> O(3s5S)
+!   2: electron impact excitation and cascade O + e* -> O(3p5P) -> O(3s5S)
+!   3: radiative recombination O+ + e -> O(3s5S)
+!   4: mutual neutralization O+ + O- -> O + O(3s5S)
+! ZCETA(*,14,z): N(3s2P) doublet at 1493A
+!   1: photodissociation N2 + hv -> N + N(3s2P)
+!   2: electron impact dissociation N2 + e* -> N + N(3s2P)
+! ZCETA(*,15,z): O(3s3S) triplet at 1304A
+!   1: electron impact excitation O + e* -> O(3s3S)
+!   2: electron impact excitation and cascade O + e* -> O(3p3P) -> O(3s5S)
+!   3: electron impact excitation and cascade O + e* -> O(3d3D) -> -> O(3s5S)
+!   4: electron impact excitation and cascade O + e* -> O(3s'3D) -> -> O(3s5S)
+!   5: radiative recombination O+ + e -> O(3s3S)
+
+A few notes:
+
+   With version 0.98, GLOW now uses Fortran 90 conventions, including
+use-associated variables defined in module CGLOW instead of in common blocks.
+This was done for compatibility with parallel processing using MPI.  Most of the
+routines were re-cast in free-form style, largely changed to lower case, and
+have a ".f90" file extension suffix.  I am using a terminal column-width of 
+100 characters for editing and 132 characters for tabular output.  There are
+some routines still coded in fixed-format Fortan-77 style, including
+exsect.f and fieldm.f.  The reason for this is that these two are due for an
+overhaul and replacement, respectively, and it didn't seem worthwhile to
+re-format them at this time.  (Subroutine exsect will ultimately be changed to
+tablular data-file inputs instead of analytic functions, and fieldm will be
+updated to IGRF/Apex coordinates).
+
+   The parallel processing strategy adopted is to let main program
+glowdriver.f90 handle all MPI calls, so that the core subroutines can be used
+in either multiple or single-processor mode.  The 0th task performs all
+I/O and empirical model calls, distributes variables to the other tasks,
+collects the results, and outputs them to a netCDF file.  The domain
+decomposition is one-dimensional in latitude.  The number of tasks (processors)
+must be an integral multiple of the number of latitudes.  Since a typical 5x5
+degree grid has 36 latitudes, 4, 6 or 12 processors are good numbers to use.
+Note that on the new NCAR Cheyenne supercomputer, one node has 36 cores!
+The number of processors is configurable in the job script runglow.job.
+
+   Versions of NRLMSISE-00 and IRI-90 are provided for the convenience of users
+who do not have their own copies.  Attribution to the appropriate sources
+(Picone et al, 2002; Belitza, 1990) should be made.  The version of IRI
+provided is not the standard version, as I have modified it to work on various
+systems, particularly volatile memory systems.  However, I cannot guarantee
+that the results obtained from them are correct.  Caution: IRI occasionally
+writes messages on unit 12.  IRI data files ccir*.asc and ursi*.asc
+are contained in ./data/iri90/ and this directory or a different directory
+can be specified in the namelist inputs.  MSIS and IRI are old-style Fortran
+with common blocks, and hence are not appropriate for MPI implementation, so
+they are called by glowdriver using the 0th processor only.  Since they are
+very fast (compared to, e.g., etrans) this is a minimal performance loss.
+
+   The default energy grid extends to 50 keV and is appropriate for most
+photoelectron and auroral calculations; the electron energy grid can extend
+(in principle) to 1 GeV.  The altitude grid may be altered to suit the user's
+needs, but with caution.  The two biggest pitfalls are not providing enough
+resolution and not providing a deep enough atmosphere.  There should be no
+significant flux of electrons out of the bottom of the altitude grid.  As for
+resolution, a rule of thumb is about four points per scale height. 
+
+   The ETRANS error code IERR and energy conservation ratio EFRAC
+should be checked for normal return.  IERR should equal zero; if it doesn't
+it means that the total inelastic cross section is near zero somewhere, which
+is usually caused by a near zero ambient electron density.  EFRAC should be
+less than ~0.03 for photoelectron calculations, and less than ~0.1 for aurora.
+It can get up to the 0.1-0.2 range in the twilight, which is not good, but at
+present unavoidable.
+  
+   Electron density calculations can be made by GCHEM below 200 km but not
+above where transport/diffusion effects become important.  Therefore, an
+electron density profile (such as from the NCAR TIE-GCM or from IRI) must be
+provided above 200 km.  An initial non-zero electron density profile must be
+provided at all altitudes in array ZE because otherwise ETRANS will produce
+an error.  Calculated electron densities are returned in array ECALC, with
+values from ZE included where calculations are not made.  The switch KCHEM
+determines what ion/electron density calculations are made (see subroutine
+GCHEM).  With the exception of KCHEM=0 (no calculations), none are foolproof.
+One irritation that may be noted when KCHEM=4 (calculate Ne below 200 but use
+provided Ne above 200) is a discontinuity in Ne(z) at 200 km.  GCHEM attempts
+to deal with this by interpolating from the 200 km level to three grid
+points above it.  Another caveat with KCHEM=4 or KCHEM=3 (Ne provided,
+ions calculated) is that if there is an incompatibility between the specifed
+Ne(z) and the calculated ionization rates, negative values for some ions may
+result.  KCHEM=2 (electrons and major ions provided, minor ions calculated) and
+KCHEM=1 (electrons and all ions except O+(2D,2P) provided) should be fairly
+reliable.
+
+   For daytime calculations, the parameter XUVFAC is provided to deal with the
+uncertainty concerning the solar spectrum from 18-250 A.  When the
+Hinteregger et al. [1981] model is employed, a reasonable value for XUVFAC is
+2.0, as suggested by Richards et al. [1984; 1994], however a value as high as
+4.0 might be realistic, as discussed by Solomon et al. [2001].  When the
+EUVAC model [Richards et al., 1994] is employed, XUVFAC is only applied
+to the region still obtained from the Hinteregger model, 18-50 A, since
+longward of that point EUVAC has already increased the solar fluxes relative
+to the Hinteregger spectrum (by factors of 2-3).  SSFLUX also now provides
+the ability for the user to specify a solar spectrum from other models or
+measurements, in which case XUVFAC is ignored.  The number of bins in the
+solar spectrum input file must be equal to LMAX (specified in glow.h) and
+the wavelength ranges must correspond to those in ephoto_x*.dat.
+
+   The upper boundary of the electron transport calculation by ETRANS is
+specified by the PHITOP array, which may contain a flux of auroral electrons,
+conjugate photoelectrons, or both.  The initial electron density profile
+input for the call to GLOW can be replaced by the calculated profile below
+200 km, and GLOW called again.  This isn't really necessary, but gives an
+improved estimate of the low-energy electron flux (which depends on the ambient
+electron density), since IRI isn't really valid in the auroral regions.
+For high-energy calculations this second call may safely be skipped.
+
+   The example programs use the NOEM model of nitric oxide, based on data from
+the SNOE satellite, as an empirical input [Marsh et al., 2004].  When running
+from GCM fields the NO calculated by the GCM is used.
+  
+   Electron impact cross sections generated by EXSECT can be obtained from
+variables use associated through the CGLOW module.
+
+   References/Citations:
+Nagy, A. F., and P. M. Banks, Photoelectron fluxes in the ionosphere,
+   J. Geophys. Res., 75, 6260, 1970.
+Solomon, S. C., P. B. Hays, and V. J. Abreu, The auroral 6300A emission:
+   Observations and modeling, J. Geophys. Res., 93, 9867, 1988.
+Solomon, S. C., and V. J. Abreu, The 630 nm dayglow, J. Geophys. Res., 94,
+   6817, 1989.
+Solomon, S. C., Auroral particle transport using Monte Carlo and hybrid
+   methods, J. Geophys. Res., 106, 107, 2001.
+Solomon, S. C., S. M. Bailey, and T. N. Woods, Effect of solar soft X-rays
+   on the lower atmosphere, Geophys. Res. Lett., 28, 2149, 2001.
+Bailey, S. M., C. A. Barth, and S. C. Solomon, A model of nitric oxide in the
+   lower thermosphere, J. Geophys. Res., 107, 1205, 2002.

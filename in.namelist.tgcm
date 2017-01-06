@@ -1,0 +1,75 @@
+&glow_input
+
+! Namelist input file for glow model driver glow_drv.F90.
+
+! tgcm_ncfile: TIEGCM or TIMEGCM history file. If this is provided, glow_drv will
+! use tgcm inputs, and loop over the tgcm lat x lon grid.
+! if no tgcm_ncfile is provided, glow_drv will use MSIS and IRI.
+
+!tgcm_ncfile='/hao/tethysv1/data/tiegcm/glowtest/mareqxmin.dres.sec.notide.nc'
+!tgcm_ncfile='/hao/tethysv1/data/tiegcm/glowtest/decsolmax.dres.sec.nc'
+!tgcm_ncfile='/hao/tethysv1/data/tiegcm/glowtest/junsolmax.dres.sec.nc'
+!tgcm_ncfile='/hao/tethysv1/data/tiegcm/glowtest/agu2006.dres.sec.heelisgpi.30.s3en3.nc'
+ tgcm_ncfile='/hao/tethysv1/data/tiegcm/test2/mareqxmax.v2sres.newerelden.sec.nc'
+
+! start_mtime: model start time (day,hour,minute) (if -999, will start at first history)
+! stop_mtime: model stop time (day,hour,minute) (if -999, will stop at last history)
+! default (if not read from namelist) is to process all histories in the file)
+
+!start_mtime =347,0,30
+!stop_mtime  =351,0,0
+
+!start_mtime =355,20,00
+!stop_mtime  =355,20,00
+
+ start_mtime =81,0,0
+ stop_mtime  =81,0,0
+
+!start_mtime = -999
+!stop_mtime  = -999
+
+! output file (note that frame numbers and '.nc' will be appended):
+
+glow_ncfile = '/hao/tethysv1/data/glowout/tiegcm/test2/glow.mareqxmax'
+
+! directory containing ephoto, snoem, and ssflux data files (default is data/).
+
+data_dir = 'data/'
+
+! directory containing IRI coefficient data files (default is data/iri90/):
+
+iri90_dir = 'data/iri90/'
+
+! flags controlling various glow options:
+
+jlocal = 0         ! 0 = full electron transport, 1 = local only
+kchem =  4         ! 3 = use specified Ne, 4 = calculate Ne < 200 km, specified Ne > 200 km
+iscale = 1         ! 0 = Hinteregger solar model, 1 = EUVAC solar model, 2 = user specified
+xuvfac = 3.        ! multiply solar flux by xuvfac, EUVAC 18-50 A or Hinteregger 18-250
+writelbh = .true.  ! switch controlling output of LBH upper state excitation rates
+writered = .false. ! switch controlling output of OI 6300 redline component excitation rates
+
+! inputs used for MSIS/IRI runs only (if this is a TGCM run, these are taken from input history):
+
+indate    = 15084   ! date in yyddd format
+utstart   =     0.  ! start universal time in seconds (e.g., 43200. would be 12 hours)
+utstep    =  3600.  ! time step in seconds
+utstop    = 86400.  ! end universal time in seconds 
+f107a     =    70.  ! F10.7 81-day centered average
+f107      =    70.  ! F10.7 daily value
+f107p     =    70.  ! F10.7 daily value for previous day
+ap        =     4.  ! Ap index
+nlat_msis =    36   ! Number of latitudes in grid (generally 36 or 72)
+nlon_msis =    72   ! Number of longitudes in grid (generally 72 or 144)
+
+! auroral inputs for MSIS/IRI runs only:
+
+ef     = 0.0    ! Auroral electron energy flux, erg cm-2.
+ec     = 2000.  ! Auroral electron characteristic energy, eV
+itail  = 0      ! Low-energy tail (1=yes, 0=no)
+fmono  = 0.     ! Monoenergetic energy flux, erg cm-2
+emono  = 0.     ! Monoenergetic characteristic energy, keV
+
+! Slash must be here for EOF:
+
+/

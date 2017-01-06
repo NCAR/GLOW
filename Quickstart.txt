@@ -1,0 +1,31 @@
+Quick start for GLOW v. 0.98
+
+Copy all the files and sub-directories into a directory, or, 
+  copy the file glowv0.98.tar to a directory and tar -xf glowv0.98.tar
+While in that directory:
+  cp Makefile.glowbasic Makefile
+  gmake
+Run the glowbasic driver with default dayglow inputs:
+  glow.exe < in.basic.day > test.basic.day
+Compare the output you get to the example output in out.basic.day
+If it looks reasonable, try making some plots
+Now try the glowbasic driver with default auroral inputs:
+  glow.exe < in.basic.aur > test.basic.aur
+Compare the output you get to the example output in out.basic.aur
+If it looks reasonable, try making some plots
+Then, do some runs with your own input parameters
+
+Now try making some modifications to the glowbasic program to suit your purposes
+
+You can also run glowbasic out of IDL using:
+  spawn, './glow.exe < input.file > output.file'
+
+Or, move on the the MPI global driver:
+  Assure that MPI and netCDF libraries are installed on your operating system
+  cp Makefile.glowdriver Makefile
+  gmake
+  cp in.namelist.msis in.namelist
+  runglow.job
+Check the file out.log to make sure it executed properly
+Then compare the netCDF file generated to the example output at:
+  http://download.hao.ucar.edu/pub/stans/glow/output/decminmsis.001.nc
