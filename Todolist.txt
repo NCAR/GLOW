@@ -1,0 +1,124 @@
+This is a list of additions, enhancements, corrections, etc., that I am
+currently working on or thinking about, which hopefully will be included
+in the next release of the GLOW model, anticipated for 2018.
+
+Anybody that wants to volunteer to work on one of these, feel free.
+
+LBH thresholding
+Update SUNCOR
+Correct solar irradiance for Sun-Earth distance
+Green line recombination emission
+O2 A-bands emission
+Ion chemistry re-examination
+Option for parameterized auroral proton ionization rate
+Update magnetic field used in FIELDM and GEOMAG
+Re-install conjugate photoelectrons as an option
+Update IRI
+WACCM-X interface for driver program
+Fix electron heating rate
+Add He, He, He+, and H+
+Add cusp and drizzle fluxes from TGCMs
+Re-write EXSECT for table-based electron impact cross-sections
+
+Discussion:
+
+LBH thresholding:
+This means putting in different cross sections for each v' upper state,
+each of which has a different threshold.  The approach will be to use a total
+cross section for N2(a) in the energetic electron redistribution array, but
+individual cross sections for each v' in the excitation calculation.  That will
+be done in the new subroutine BANDS, which also could handle collisional/cascade
+re-distribution.
+
+Update SUNCOR:
+SUNCOR needs to be updated for a permanent Y2K fix, and J2000
+coordinates.  It's pretty accurate as it is, at least through 2050.  Also add
+Sun-Earth distance, which is part of the same algorithm but not currently
+calculated.
+
+Correct solar irradiance for Sun-Earth distance:
+Nobody ever thought we knew solar EUV to anything close to 7% accuracy, so
+I never worried about this before.  Now, with improved measurements,
+it seems worth bothering to put it in.  Also note that a comment in the
+NRLMSISE-00 source code indicates that the value of F10.7 input to MSIS should
+actually be the measured value at Earth, not the 1 AU value, which means that
+it should be corrected for Sun-Earth distance.
+
+Green line recombination emission:
+This has been on the list for decades.  Just haven't gotten around to it,
+because it isn't important above ~100 km, for projects I've been working
+on.  But it needs to be done.  Could be done by solving for all the O2
+Hertzberg upper states, or as a specific recombination rate, skipping the
+details, which brings us to...
+
+O2 A-bands emission:
+Also long overdue.  All the pieces for the thermospheric components are
+there, but need to deal with recombination, and O3 if we go into the
+mesosphere.
+
+Ion chemistry re-examination:
+I would like to bring GLOW into general agreement with Richards [2011]
+who did a great job with this.  The only reason it hasn't happened yet is that
+ion chemistry is not the prime mission here, but it can be important,
+especially for aurora, and daytime E-region.
+
+Option for parameterized auroral proton ionization rate:
+This is in progress.  Immediate goal is to have a mechanism for calculating
+electron density profiles and conductivities, not to produce secondaries and
+emission features.
+
+Update magnetic field used in FIELDM and GEOMAG:
+This is overdue for an overhaul, but lower priority because FIELDM's only job
+is to calculate the dip angle, and electron transport is weakly dependent on
+dip angle.  GEOMAG now only handles coordinate transforms for the NOEM nitric
+oxide model, which is based on SNOE data that were analyzed with a simple
+offset-tilted-dipole model to begin with.  Nevertheless, I'd like to
+consolidate these using IGRF and Apex coordinates, including secular
+variation, using the standard TGCM method.  This would also make the
+conjugate electron calculation (currently deprecated) more accurate.
+
+Re-install conjugate photoelectrons as an option:
+This is easily recovered from v. 0.97, but I took it out because of the above,
+because it is a large performance hit for global calculations, and because it
+wasn't really in use.
+
+Update IRI:
+Many might wonder why GLOW still uses IRI-90 as its default empirical a-priori
+ionosphere.  The reasons are that GLOW generally only uses a-priori electron
+density above 200 km, and the F-region in IRI hasn't changed much.  Also, the
+new versions of IRI come with their own input files, imbedded MSIS calls,
+and many options that aren't needed by GLOW.  I need to strip out all the
+paraphernalia, and create a simple subroutine interface, similar to what is
+now used for IRI-90.  It's a lot of messing around with OPC and I'm hoping
+somebody else will do it.
+
+WACCM-X interface for driver program:
+This will be similar to the READTGCM module.  Any help appreciated!
+
+Fix electron heating rate:
+Electron heating rates are calculated, but approximate, because there isn't
+enough energy bin resolution below ~1 eV and because of the way the
+the bottom bin is treated.
+
+He and H are available from empirical and/or numerical models and can be added
+easily, ionization rates and charge exchange chemistry could then be
+incorporated.  I anticipate that they would be treated as minor species, i.e.,
+neglecting contributions to absorption and photoelectron generation, as is
+currently done with N and NO.
+
+Add cusp and drizzle fluxes from TGCMs:
+These can be specified on TGCM secondary histories, and are included in
+readtgcm; just need a simple interface to generate the appropriate energetic
+electrons into ETRANS.
+
+Re-write EXSECT for table-based cross-section input:
+This isn't really a low priority, in fact it might be the highest priority,
+especially because some people have complained about how inflexible the 
+heritage cross section method is.  At the same time, I need to re-evaluate
+cross sections, and break out the lumped states, espcially the N2 singlets
+because of the importance of LBH, but also the N2 triplets and O2
+Hertzbergs.  The reason this is at the bottom of the list is that it is a lot of
+work, in part because the secondary electron production is bound up in the
+analytic ionization cross-section method, and also because EXSECT has some of
+the oldest and messiest of all the GLOW code.
+
