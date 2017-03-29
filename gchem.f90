@@ -8,6 +8,7 @@
 
 ! 3/2016: Replaced quartic solution to electron density equation
 ! with iterative method.  Also added constraint O+ > 0 for KCHEM=3.
+! 1/2017: Removed 7774 -> 1356 fudge factor (and reduced 7774 cross section in exsect.f)
 
 ! Electron density must be supplied above 200 km in array ZE, a priori
 ! values are expected but not necessarily required at and below 200 km,
@@ -180,9 +181,9 @@
 !      B42 O+(2Do) fr. O+(2Pe)     Kirby et al, 1979
 !      B43 N2(C) bound fraction    ?
 !      B44 7990 fr. O(3s'3D)       appx. fr. Hecht, p.c.
-!      B45 O(5S) fr. O(3p5P)       fudge factor for 1356 cascade contribution
-!      B46 N 1493 fr. N2+hv        guess 
-!      B47 N 1493 fr. N2+e*        guess
+!      B45                         not currently in use 
+!      B46 N 1493 fr. N2+hv DI     guess 
+!      B47 N 1493 fr. N2+e* DI     guess, cf. Mumma and Zipf (1973), Meier (1991)
 !      B48 N2(a) from (a,a',w)     estimate from comparison with Ajello & Shemansky, GUVI data, etc.
 !      B49 7774, 1356 fr. O-+O+    Melendez, 1999; Qin, 2015 (cf. Tinsley 1973; Julienne, 1974)
 !      G1  N2+B(0,0) (3914)        Broadfoot, 1967
@@ -217,7 +218,7 @@
             0.48, 0.10, 0.10, 0.10, 0.16, 0.50, 0.30, 0.19, 0.00, 0.10, &
             0.43, 0.51, 0.10, 0.60, 0.54, 0.44, 0.80, 0.20, 1.00, 0.33, &
             0.33, 0.34, 0.21, 0.20, 0.10, 0.11, 0.65, 0.20, 0.24, 0.02, &
-            0.18, 0.72, 0.75, 0.10, 0.50, 0.01, 0.01, 0.85, 0.54, 0.00  /
+            0.18, 0.72, 0.75, 0.10, 0.00, 0.05, 0.02, 0.70, 0.54, 0.00  /
 !
 !
     IF (KCHEM .EQ. 0) RETURN
@@ -332,7 +333,7 @@
       OPI(I)   = PHOTOI(1,1,I)+PHOTOI(2,1,I)+PHOTOI(3,1,I)+PHOTOI(4,1,I)+PHOTOI(5,1,I)
       O2PI(I)  = PHOTOI(1,2,I)+PHOTOI(2,2,I)+PHOTOI(3,2,I)
       RN2PI(I) = PHOTOI(1,3,I)+PHOTOI(2,3,I)+PHOTOI(3,3,I)+PHOTOI(4,3,I)+PHOTOI(5,3,I)
-      TPI(I)   = OPI(I)+O2PI(I)+RN2PI(I)+PHONO(1,I)
+      TPI(I)   = OPI(I)+O2PI(I)+RN2PI(I)+PHOTOI(4,2,I)+PHOTOI(6,3,I)+PHONO(1,I)
       TIR(I)   = TEI(I)+TPI(I)
       RN2ED(I) = AGLW(5,3,I)+AGLW(6,3,I)+AGLW(7,3,I)+B(24)*PIA(3,I)
       SRCED(I) = AGLW(4,2,I) + B(35)*PIA(2,I)
@@ -730,12 +731,12 @@
       ZCETA(1,12,I) = AGLW(4,3,I) * B(48)
 !
       ZCETA(1,13,I) = AGLW(3,1,I)
-      ZCETA(2,13,I) = B(45) * AGLW(5,1,I)
+      ZCETA(2,13,I) = AGLW(5,1,I)
       ZCETA(3,13,I) = KZ(41,I) * DEN(3,I) * E(I)
       ZCETA(4,13,I) = B(49) * KZ(43,I) * OMINUS(I) * DEN(3,I)
 !
-      ZCETA(1,14,I) = B(46)*PHOTOD(1,3,I)
-      ZCETA(2,14,I) = B(47)*RN2ED(I)
+      ZCETA(1,14,I) = B(46)*PHOTOI(6,3,I)
+      ZCETA(2,14,I) = B(47)*B(15)*RN2EI(I)
 !
       ZCETA(1,15,I) = AGLW(4,1,I)
       ZCETA(2,15,I) = AGLW(6,1,I)
@@ -796,4 +797,6 @@
 !
 !
     RETURN
-  END
+!
+  END SUBROUTINE GCHEM
+

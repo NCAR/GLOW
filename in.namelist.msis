@@ -8,7 +8,7 @@
 ! use tgcm inputs, and loop over the tgcm lat x lon grid.
 ! if no tgcm_ncfile is provided, glow_drv will use MSIS and IRI.
 
-!tgcm_ncfile='/hao/tethysv1/data/tiegcm/glowtest/decsolmin.dres.sec.nc'
+!tgcm_ncfile='/hao/tethysv1/data/tiegcm/test2/mareqxmax.v2sres.sec.nc'
 
 ! start_mtime: model start time (day,hour,minute) (if -999, will start at first history)
 ! stop_mtime: model stop time (day,hour,minute) (if -999, will stop at last history)
@@ -19,7 +19,7 @@
 
 ! output file (note that frame numbers and '.nc' will be appended):
 
-glow_ncfile = '/hao/tethysv1/data/glowout/msisiri/glow.decsolmin'
+glow_ncfile = 'out.decminmsis'
 
 ! directory containing data files for input to ephoto, snoem, and ssflux (default is data/).
 

@@ -12,7 +12,7 @@
 ! Electron densities from IRI-90.
 
 ! Inputs:
-!         jmax   Number of altitude levels used by GLOW (should = 86 for MSIS/IRI/NOEM runs)
+!         jmax   Number of altitude levels used by GLOW (should = 102 for MSIS/IRI/NOEM runs)
 !         nex    Number of ionized/excited species (for array zxden)
 !         idate  Nate in yyyyddd or yyddd format
 !         ut     Universal time, seconds)
@@ -57,7 +57,7 @@ subroutine mzgrid (jmax,nex,idate,ut,glat,glong,stl,f107a,f107,f107p,ap,iri90_di
   real,allocatable :: outf(:,:)              ! iri output (11,jmax)
   data sw/25*1./
 
-  if (jmax /= 86) then
+  if (jmax /= 102) then
     write(6,"('mzgrid: unknown JMAX = ',i5)") jmax
     stop 'mzgrid'
   endif
@@ -67,15 +67,17 @@ subroutine mzgrid (jmax,nex,idate,ut,glat,glong,stl,f107a,f107,f107p,ap,iri90_di
 !
 ! Set default altitudes:
 !
-      z = (/ 80.0,81.5,83.0,84.5,86.0,87.5,89.0,90.5,92.0,93.5, &
-             95.0,97.5,99.0,100.5,102.0,103.5,105.0,107.5,109.,111., &
-             113.,115.,117.5,120.,122.5,125.,128.,131.,135.,139., &
-             143.,148.,153.,158.,164.,170.,176.,183.,190.,197., &
-             205.,213.,221.,229.,237.,245.,254.,263.,272.,281., &
-             290.,300.,310.,320.,330.,340.,350.,360.,370.,380., &
-             390.,400.,410.,420.,430.,440.,450.,460.,470.,480., &
-             490.,500.,510.,520.,530.,540.,550.,560.,570.,580., &
-             590.,600.,610.,620.,630.,640. /)
+  z = (/  80.,  81.,  82.,  83.,  84.,  85.,  86.,  87.,  88.,  89., &
+          90.,  91.,  92.,  93.,  94.,  95.,  96.,  97.,  98.,  99., &
+         100., 101., 102., 103., 104., 105., 106., 107., 108., 109., &    
+         110.,111.5, 113.,114.5, 116., 118., 120., 122., 124., 126., &
+         128., 130., 132., 134., 137., 140., 144., 148., 153., 158., &
+         164., 170., 176., 183., 190., 197., 205., 213., 221., 229., &
+         237., 245., 254., 263., 272., 281., 290., 300., 310., 320., &
+         330., 340., 350., 360., 370., 380., 390., 400., 410., 420., &
+         430., 440., 450., 460., 470., 480., 490., 500., 510., 520., &
+         530., 540., 550., 560., 570., 580., 590., 600., 610., 620., &
+         630., 640. /)
 !
 ! Call MSIS-2K to get neutral densities and temperature:
 !
@@ -112,11 +114,11 @@ subroutine mzgrid (jmax,nex,idate,ut,glat,glong,stl,f107a,f107,f107p,ap,iri90_di
 
         do j=1,jmax
           ze(j) = outf(1,j) / 1.E6
-          if (ze(j) .lt. 100.) ze(j) = 100.
+          if (ze(j) < 100.) ze(j) = 100.
           zti(j) = outf(3,j)
-          if (zti(j) .lt. ztn(j)) zti(j) = ztn(j)
+          if (zti(j) < ztn(j)) zti(j) = ztn(j)
           zte(j) = outf(4,j)
-          if (zte(j) .lt. ztn(j)) zte(j) = ztn(j)
+          if (zte(j) < ztn(j)) zte(j) = ztn(j)
           zxden(3,j) = ze(j) * outf(5,j)/100.
           zxden(6,j) = ze(j) * outf(8,j)/100.
           zxden(7,j) = ze(j) * outf(9,j)/100.

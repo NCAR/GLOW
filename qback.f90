@@ -49,10 +49,15 @@
 
   subroutine qback (zmaj,zno,zvcd,photoi,phono,f107,jm,nmaj,nst)
 
-    dimension zmaj(nmaj,jm), zno(jm), zvcd(nmaj,jm), &
-              photoi(nst,nmaj,jm), phono(nst,jm)
+    implicit none
 
-    dimension al(3), sa(3,3), si(3,3)
+    integer,intent(in) :: jm, nmaj, nst
+    real,intent(in) :: zmaj(nmaj,jm), zno(jm), zvcd(nmaj,jm), f107
+    real,intent(inout) :: photoi(nst,nmaj,jm), phono(nst,jm)
+
+    integer :: j, l
+    real :: al(3), sa(3,3), si(3,3), salyao2, silyano, bn2p, bn1p
+    real :: flyan, tau, qbo1, qbo2, qbn2, qbn1, qbno
 
     data al /1.5e7, 1.5e6, 1.5e6/
     data sa /      0.,  1.6e-18,       0., &
@@ -104,4 +109,4 @@
     enddo
 
     return
-  end
+  end subroutine qback

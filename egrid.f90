@@ -15,20 +15,32 @@
 
  
 subroutine egrid (ener, del, nbins)
-  dimension ener(nbins), del(nbins)
+
+  implicit none
+
+  integer,intent(in) :: nbins
+  real,intent(out) :: ener(nbins), del(nbins)
+
+  integer :: n
+
   do n=1,nbins
-    if (n .le. 21) then
+    if (n <= 21) then
       ener(n) = 0.5 * float(n)
     else
       ener(n) = exp (0.05 * float(n+26))
     endif
   enddo
+
   del(1) = 0.5
+
   do n=2,nbins
     del(n) = ener(n)-ener(n-1)
   enddo
+
   do n=1,nbins
     ener(n) = ener(n) - del(n)/2.0
   enddo
+
   return
-end
+
+end subroutine egrid

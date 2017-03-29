@@ -24,14 +24,23 @@
 
     subroutine rcolum (chi, zz, zmaj, tn, zcol, zvcd, jmax, nmaj)
 
-      parameter (nm=3)
-      dimension zz(jmax), zmaj(nmaj,jmax), tn(jmax), zcol(nmaj,jmax), &
-                zvcd(nmaj,jmax), zcg(nm)
-      data pi/3.1415926535/, re/6.37e8/
+      implicit none
+
+      integer,intent(in) :: jmax, nmaj
+      real,intent(in) :: chi, zz(jmax), zmaj(nmaj,jmax), tn(jmax)
+      real,intent(out) :: zcol(nmaj,jmax), zvcd(nmaj,jmax)
+
+      integer,parameter :: nm=3
+      real,parameter :: pi=3.1415926535
+      real,parameter :: re=6.37e8
+
+      integer :: i, j, k
+      real :: zcg(nm), ghrg, ghz, tng
+      real,external :: chap
 
       call vcd (zz, zmaj, zvcd, jmax, nmaj)
 
-      if (chi .ge. 2.) then 
+      if (chi >= 2.) then 
         do i=1,nmaj
           do j=1,jmax
             zcol(i,j) = 1.0e30
@@ -40,7 +49,7 @@
         return
       endif
 
-      if (chi .le. pi/2.) then
+      if (chi <= pi/2.) then
         do i=1,nmaj
           do j=1,jmax
             zcol(i,j) = zvcd(i,j) * chap(chi,zz(j),tn(j),i)
@@ -50,13 +59,13 @@
         do j=1,jmax
           ghrg=(re+zz(j))*sin(chi) 
           ghz=ghrg-re 
-          if (ghz .le. zz(1)) then
+          if (ghz <= zz(1)) then
             do i=1,nmaj
               zcol(i,j) = 1.0e30
             enddo
           else
             do k=1,j-1
-              if (zz(k) .le. ghz .and. zz(k+1) .gt. ghz) then
+              if (zz(k) <= ghz .and. zz(k+1) > ghz) then
                 tng = tn(k)+(tn(k+1)-tn(k))*(ghz-zz(k))/(zz(k+1)-zz(k))
                 do i=1,nmaj
                   zcg(i) = zvcd(i,k) * (zvcd(i,k+1) / zvcd(i,k)) ** &
@@ -73,39 +82,72 @@
       endif
 
       return 
-    end 
 
+    end subroutine rcolum
 
+!----------------------------------------------------------------------
 
-    function chap (chi, z, t, i)
-      parameter (nmaj=3)
-      dimension am(nmaj)
-      data am/16., 32., 28./, pi/3.1415926535/, re/6.37e8/, g/978.1/
+    real function chap (chi, z, t, i)
+
+      implicit none
+
+      real,intent(in) :: chi, z, t
+      integer,intent(in) :: i
+
+      integer,parameter ::  nmaj=3
+      real,parameter :: pi=3.1415926535
+      real,parameter :: re=6.37e8
+      real,parameter :: g=978.1
+
+      real :: am(nmaj), gr, hn, hg, hf, sqhf
+      real,external :: sperfc
+
+      data am/16., 32., 28./
+
       gr=g*(re/(re+z))**2 
       hn=1.38e-16*t/(am(i)*1.662e-24*gr)
       hg=(re+z)/hn 
       hf=0.5*hg*(cos(chi)**2) 
       sqhf=sqrt(hf) 
       chap=sqrt(0.5*pi*hg)*sperfc(sqhf) 
+
       return
-    end
 
+    end function chap
 
+!----------------------------------------------------------------------
 
-    function sperfc(dummy) 
-      if (dummy .le. 8.) then
+    real function sperfc(dummy) 
+
+      implicit none
+
+      real,intent(in) :: dummy
+
+      if (dummy <= 8.) then
         sperfc = (1.0606963+0.55643831*dummy) / &
                  (1.0619896+1.7245609*dummy+dummy*dummy)
       else
         sperfc=0.56498823/(0.06651874+dummy) 
       endif 
+
       return 
-    end 
 
+    end function sperfc
 
+!----------------------------------------------------------------------
 
     subroutine vcd(zz,zmaj,zvcd,jmax,nmaj)
-      dimension zz(jmax), zmaj(nmaj,jmax), zvcd(nmaj,jmax)
+
+      implicit none
+
+      integer,intent(in) :: jmax,nmaj
+      real,intent(in) :: zz(jmax), zmaj(nmaj,jmax)
+
+      real,intent(out) :: zvcd(nmaj,jmax)
+
+      integer :: i, j
+      real :: rat
+
       do i=1,nmaj
         zvcd(i,jmax) =   zmaj(i,jmax) &
                        * (zz(jmax)-zz(jmax-1)) &
@@ -115,5 +157,7 @@
           zvcd(i,j) = zvcd(i,j+1)+zmaj(i,j)*(zz(j)-zz(j+1))/alog(rat)*(1.-rat)
         enddo
       enddo
+
       return
-    end
+
+    end subroutine vcd

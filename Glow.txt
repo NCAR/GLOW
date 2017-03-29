@@ -4,7 +4,7 @@
 
                ***  see Releasenotes.txt for release notes  ***
   
-                           Stan Solomon, 1/2017
+                           Stan Solomon, 3/2017
   
    The GLobal airglOW (GLOW) model is a family of subroutines that calculates
 ionization and excitation rates, energetic electron production and transport,
@@ -64,11 +64,21 @@ You can also run glowbasic out of IDL using:
 from general circulation models such as the NCAR TIE-GCM and TIME-GCM to
 specify the neutral densities, electron density, and temperatures, and then
 calculate airglow emissions globally on the GCM grid.  It uses
-netCDF files for input and output.  It can also be run globally using MSIS/IRI
+netCDF files for input and output, and a namelist input file to specify input
+options.
+   To run GLOW with TIE-GCM or TIME-GCM inputs, the GCM is run first, and a
+secondary history file created.  This file must contain the output fields:
+Zg, Te, Ti, Te, Ne, O2, O1, N2, NO, N4S, N2D,
+and optionally the auroral parameters:
+eflux, nflux, alfa, cusp, drizzle, ec, alfac, ed.
+He, un, and vn anre also optional, which are not used by GLOW, but are passed
+through to the output files. 
+
+   Program glowdriver.f90 can also be run globally using MSIS/IRI
 inputs.  Solar and auroral parameters are taken from the GCM histories when
 running in GCM mode, and can be supplied by the user when in empirical mode,
-although there is no way to provide auroral spatial distributions at this time,
-so these would generally be omitted when using empirical model inputs.
+although there is no way to provide auroral spatial distributions when running
+in empirical mode at this time, so these would generally be omitted.
 To use glowdriver:
    cp Makefile.glowdriver Makefile
    gmake
@@ -77,7 +87,7 @@ You don't need to use the runglow.job script, you can use mpirun from the
 command line.  The script is set up to use 6 processors, input from the
 file in.namelist, netCDF output to a file specified by the namelist inputs,
 and log messages to the file out.log.  The script can easily be edited to
-change these.  
+change these.
   
    Subroutine GLOW is the master routine of the package.  It receives input
 parameters from the calling program use associated through module CGLOW, calls
@@ -345,6 +355,18 @@ can be specified in the namelist inputs.  MSIS and IRI are old-style Fortran
 with common blocks, and hence are not appropriate for MPI implementation, so
 they are called by glowdriver using the 0th processor only.  Since they are
 very fast (compared to, e.g., etrans) this is a minimal performance loss.
+
+   When using GCM inputs, note that the TIE-GCM altitude grid doesn't extend
+below ~97 km, but electron transport calculations require a "sponge" layer, so
+densities are extrapolated from ~79 km to ~97 km using an assumed constant scale
+height of 6 km.  Temperatures, Electron density, and nitric oxide density are
+assumed to be constant below the bottom of the grid.  Therefore, results below
+~97 km should be ignored.  This is not a problem for the TIME-GCM since its
+altitude grid extends down to ~30 km, but note that GLOW does not yet contain
+full D-region chemistry or mesopause-region recombination emissions.  For
+empirical model inputs, MSIS and IRI provide full altitude profiles, but NOEM
+only extends from 100-150 km, so a constant value is used for nitric oxide
+below 100 km, and a scale height assumption above 150 km.
 
    The default energy grid extends to 50 keV and is appropriate for most
 photoelectron and auroral calculations; the electron energy grid can extend

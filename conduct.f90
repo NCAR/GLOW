@@ -40,6 +40,8 @@
     SUBROUTINE CONDUCT(lat, long, alt, nO, nO2, nN2, nOp, nO2p, nNOp, &
                          Tn, Ti, Te, PedCond, HallCond)
 
+      implicit none
+
       real, intent(in) :: lat,long,alt,nOp,nO2p,nNOp
       real, intent(in) :: Tn, Te, Ti, nO, nO2, nN2
       real, intent(out) :: PedCond, HallCond
@@ -135,7 +137,7 @@
                                      nO2p/(1+r_O2p**2) -          &
                                      nNOp/(1+r_NOp**2) )
 
-      if (HallCond .lt. 0.) HallCond=0.
+      if (HallCond < 0.) HallCond=0.
 
       return
-    end
+    end subroutine conduct

@@ -57,4 +57,4 @@
       close(lun)
       return
 
-    end
+    end subroutine rout

@@ -9,6 +9,7 @@ C Added high-energy relativistic cross section correction, SCS, 1999
 C Updated comments, SCS, 2002
 C Included in GLOW v. 0.97, SCS, 2005
 C Replaced common blocks with use-associated variables defined in module cglow, Ben Foster, 2015
+C Reduced O(3p5P) (7774) cross section A0 from 0.817 to 0.327, SCS, 1/2017
 C
 C Definitions:
 C SIGS   elastic cross sections for each species, energy; cm2
@@ -51,9 +52,9 @@ C
       SUBROUTINE EXSECT (ENER, DEL)
 C
       use cglow,only: NMAJ,NEI,NBINS
-      use cglow,only: WW,AO,OMEG,ANU,BB,AUTO,THI,AK,AJ,TS,TA,TB,GAMS,  ! /CXPARS/
+      use cglow,only: WW,AO,OMEG,ANU,BB,AUTO,THI,AK,AJ,TS,TA,TB,GAMS, ! /CXPARS/
      |                GAMB
-      use cglow,only: SIGS,PE,PIN,SIGEX,SIGIX,SIGA,SEC,SIGA,IIMAXX     ! /CXSECT/
+      use cglow,only: SIGS,PE,PIN,SIGEX,SIGIX,SIGA,SEC,SIGA,IIMAXX    ! /CXSECT/
 C
       implicit none
 C
@@ -86,7 +87,7 @@ C
      |  (/6.17, 8.16,11.03, 8.40,12.85,14.00,13.75, 1.85, 0., 0./)
 
       AO(1:nei,1)=
-     |  (/.0100,.0042,.1793,.3565,.0817,.0245,.0293,.1221, 0.,0./)
+     |  (/.0100,.0042,.1793,.3565,.0327,.0245,.0293,.1221, 0.,0./)
       AO(1:nei,2)=
      |  (/.0797,.0211,.0215,.3400,.0657,1.110,3.480, 0.00, 0.,0./)
       AO(1:nei,3)=
@@ -496,7 +497,8 @@ C
   500 CONTINUE
 C
       RETURN
-      END
+
+      END SUBROUTINE EXSECT
 C
 !-----------------------------------------------------------------------
 C
@@ -548,14 +550,14 @@ C
    30 SIGION=0.0
       RETURN
 C
-      END
+      END FUNCTION SIGION
 C
 !-----------------------------------------------------------------------
 C
 C Function INV finds the bin number closest to energy ETA on grid ENER.
 C Bin INV or INV-1 will contain ETA.
 C
-      integer FUNCTION INV (ETA, JY, ENER)
+      INTEGER FUNCTION INV (ETA, JY, ENER)
       use cglow,only: NBINS
       implicit none
 C
@@ -575,7 +577,8 @@ C
       ENDIF
 C
       RETURN
-      END
+
+      END FUNCTION INV
 C
 !-----------------------------------------------------------------------
 C
@@ -649,15 +652,18 @@ C         IF (RATIO(K) .GT. 1.) RATIO(K) = 1.
 
       RETURN
 
-      END
+      END SUBROUTINE HEXC
 
 !-----------------------------------------------------------------------
 
-      real FUNCTION TERPOO(X,X1,X2,Y1,Y2)
+      REAL FUNCTION TERPOO(X,X1,X2,Y1,Y2)
+
       implicit none
 
       real,intent(in) :: x,x1,x2,y1,y2
 
       TERPOO = EXP ( ALOG(Y1) + ALOG(X/X1)*ALOG(Y2/Y1)/ALOG(X2/X1) )
+
       RETURN
-      END
+
+      END FUNCTION TERPOO

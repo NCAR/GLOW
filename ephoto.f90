@@ -111,7 +111,7 @@ subroutine ephoto
 ! First time only: Read cross section data from files, convert to cm2,
 ! calculate energy losses:
 
-  if (ifirst .eq. 1) then
+  if (ifirst == 1) then
     ifirst = 0
 
     filepath = trim(data_dir)//'ephoto_xn2.dat'
@@ -169,7 +169,7 @@ subroutine ephoto
         do k=1,nnn(i) 
           epsil1(k,i,l)=12397.7/wave1(l)-tpot(k,i) 
           epsil2(k,i,l)=12397.7/wave2(l)-tpot(k,i) 
-          if (wave1(l) .le. augl(i)) then
+          if (wave1(l) <= augl(i)) then
             epsil1(k,i,l) = epsil1(k,i,l) - auge(i)
             epsil2(k,i,l) = epsil2(k,i,l) - auge(i)
           endif
@@ -194,7 +194,7 @@ subroutine ephoto
       do i=1,nmaj 
         tau(l)=tau(l)+sigabs(i,l)*zcol(i,j) 
       enddo
-      if (tau(l) .lt. 20.) then
+      if (tau(l) < 20.) then
         flux(l,j)=sflux(l)*exp(-tau(l)) 
       else
         flux(l,j) = 0.0
@@ -203,12 +203,12 @@ subroutine ephoto
 ! Calculate SRC photodissociation of O2, dissociative excitation of
 ! O(1S), photodissociation of N2, and photoionization of NO by solar Ly-alpha:
 
-      if (wave1(l) .lt. 1751. .and. wave2(l) .gt. 1349.) then
+      if (wave1(l) < 1751. .and. wave2(l) > 1349.) then
         photod(1,2,j)=photod(1,2,j)+zmaj(2,j)*sigabs(2,l)*flux(l,j)
       endif
         photod(2,2,j) = photod(2,2,j) + zmaj(2,j)*sigabs(2,l)*flux(l,j)*bso2(l)
         photod(1,3,j) = photod(1,3,j) + zmaj(3,j)*(sigabs(3,l)-sigion(3,l))*flux(l,j)
-      if (wave1(l) .lt. 1221. .and. wave2(l) .gt. 1209.) then
+      if (wave1(l) < 1221. .and. wave2(l) > 1209.) then
         phono(1,j) = phono(1,j) + zno(j)*signo*flux(l,j)
       endif
     enddo
@@ -236,9 +236,9 @@ subroutine ephoto
         e1= epsil1(k,i,l) 
         e2= epsil2(k,i,l) 
 
-        if (e2 .ge. 0.) then
+        if (e2 >= 0.) then
 
-          if (e1 .lt. 0.) e1=0. 
+          if (e1 < 0.) e1=0. 
           do j=1,jmax
             dspect(j) = rion(l,i,j)*prob(k,i,l) 
             photoi(k,i,j) = photoi(k,i,j) + dspect(j)
@@ -250,16 +250,16 @@ subroutine ephoto
 
 ! Fill the boxes from m1 to m2 at all altitudes:
 
-          if (m1 .le. nbins) then
+          if (m1 <= nbins) then
             y = e2 - e1 
             do n=m1,m2
-              if (m1 .eq. m2) then
+              if (m1 == m2) then
                 fac = 1.
               else
-                if (n .eq. m1) then
+                if (n == m1) then
                   fac = (r1-e1) / y
                 else
-                  if (n .eq. m2) then
+                  if (n == m2) then
                     fac = (e2-r2) / y
                   else
                     fac = del(n) / y
@@ -278,11 +278,11 @@ subroutine ephoto
 
 ! Generate Auger electrons if energy is sufficient:
 
-      if (wave1(l) .le. augl(i)) then
+      if (wave1(l) <= augl(i)) then
         e1 = auge(i)
         e2 = auge(i)
         call boxnum (e1, e2, m1, m2, r1, r2, nbins, del, ener) 
-        if (m1.le.nbins .and. m2.le.nbins) then
+        if (m1 <= nbins .and. m2 <= nbins) then
           do j=1,jmax
             pespec(m1,j) = pespec(m1,j) + rion(l,i,j)
           enddo
@@ -315,11 +315,11 @@ subroutine boxnum (e1, e2, m1, m2, r1, r2, nbins, del, ener)
   integer :: i,j
 
   do i=1,nbins
-    if (e1 .lt. ener(i)+del(i)/2.) then
+    if (e1 < ener(i)+del(i)/2.) then
       m1 = i
       r1 = ener(i) + del(i)/2.
       do j=1,nbins
-        if (e2 .lt. ener(j)+del(j)/2.) then
+        if (e2 < ener(j)+del(j)/2.) then
           m2 = j
           r2 = ener(j) - del(j)/2.
           return 

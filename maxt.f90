@@ -27,11 +27,18 @@
 
   subroutine maxt (eflux,ezer,ener,del,nbins,itail,fmono,emono,phi)
 
-    dimension ener(nbins), del(nbins), phi(nbins)
+    implicit none
+
+    integer,intent(in) :: nbins, itail
+    real,intent(in) :: eflux, ezer, ener(nbins), del(nbins), fmono, emono
+    real,intent(out) :: phi(nbins)
+
+    integer :: k
+    real :: te, b, phimax, erat
 
     te = 0.
 
-    if (ezer .lt. 500.) then
+    if (ezer < 500.) then
       b = 0.8*ezer
     else
       b = 0.1*ezer + 350.
@@ -41,9 +48,9 @@
 
     do k=1,nbins
       erat = ener(k) / ezer
-      if (erat .gt. 60.) erat = 60.
+      if (erat > 60.) erat = 60.
       phi(k) = erat * exp(-erat)
-      if (itail .gt. 0) phi(k) = phi(k) + 0.4*phimax*(ezer/ener(k))*exp(-ener(k)/b)
+      if (itail > 0) phi(k) = phi(k) + 0.4*phimax*(ezer/ener(k))*exp(-ener(k)/b)
       te = te + phi(k) * del(k) * ener(k) * 1.6022e-12
     enddo
 
@@ -51,12 +58,13 @@
       phi(k) = phi(k) * eflux / te
     enddo
 
-    if (fmono .gt. 0.) then
+    if (fmono > 0.) then
       do k=1,nbins
-        if (emono .gt. ener(k)-del(k)/2. .and. emono .lt. ener(k)+del(k)/2.) &
+        if (emono > ener(k)-del(k)/2. .and. emono < ener(k)+del(k)/2.) &
           phi(k)=phi(k)+fmono/(1.6022e-12*del(k)*ener(k))
       enddo
     endif
 
     return
-  end
+
+  end subroutine maxt

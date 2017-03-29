@@ -12,26 +12,26 @@
     subroutine snoem(doy, kp, f107, z, mlat, nozm)
 
       use cglow,only: data_dir
+
       implicit none
       save
-      integer doy
-      real f107
-      real kp
-      real z(16)
-      real mlat(33)
-      real nozm(33,16)
-      real no_mean(33,16)
-      real eofs(33,16,3)
-      real theta0         ! day number in degrees
-      real dec            ! solar declination angle
-      real m1, m2, m3     ! coefficients for first 3 eofs
+
+      integer,intent(in) :: doy
+      real,intent(in) :: kp, f107
+      real,intent(out) :: z(16), mlat(33), nozm(33,16)
+
+      real :: no_mean(33,16)   ! mean nitric oxide distribution
+      real :: eofs(33,16,3)    ! empirical orthogonal functions
+      real :: theta0           ! day number in degrees
+      real :: dec              ! solar declination angle
+      real :: m1, m2, m3       ! coefficients for first 3 eofs
       integer ifirst, j, k, n
       data ifirst/1/
       character(len=1024) :: filepath 
 
-!... read eof file
+!... read eof file on first call
 
-      if (ifirst .eq. 1) then
+      if (ifirst == 1) then
         ifirst = 0
         filepath = trim(data_dir)//'snoem_eof.dat'
         open(unit=1,file=filepath,status='old',readonly)
@@ -43,6 +43,7 @@
       endif
 
 !... calculate coefficients (m1 to m3) for eofs based on geophysical parameters
+
 !... eof1 - kp 
 
       m1 =  kp * 0.689254 - 1.53366
@@ -74,4 +75,4 @@
 
       return
 
-    end
+    end subroutine snoem

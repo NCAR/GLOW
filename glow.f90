@@ -4,7 +4,7 @@
 ! Academic Research License Agreement contained in the file glowlicense.txt.
 ! For more information see the file glow.txt.
 
-! Version 0.98 beta, 1/2017
+! Version 0.98, 1/2017
 
 ! Stan Solomon, 1988, 1989, 1990, 1991, 1992, 1994, 2000, 2002, 2005, 2015, 2016
 !
@@ -134,7 +134,7 @@
 
 ! First call only: set up energy grid:
 
-      if (ifirst .eq. 1) then
+      if (ifirst == 1) then
         ifirst = 0
         call egrid (ener, del, nbins)
       endif
@@ -143,7 +143,7 @@
 
       call fieldm (glat, glong, 300., xf, yf, zf, ff, dip, dec, sdip)
       dip = abs(dip) * pi/180.
-      if (dip .lt. 0.01) dip=0.01
+      if (dip < 0.01) dip=0.01
 
       call solzen (idate, ut, glat, glong, sza)
       sza = sza * pi/180.
@@ -169,7 +169,7 @@
 ! spectrum and photoionization rates as a function of altitude,
 ! unless all altitudes are dark, in which case zero arrays:
 
-      if (sza .lt. 1.85) then
+      if (sza < 1.85) then
         call ephoto
       else
         photoi(:,:,:) = 0.0
@@ -196,7 +196,7 @@
         teflux = teflux + phitop(n)
       enddo
 
-      if (teflux.gt.0.001 .or. sza.lt.1.85) then
+      if (teflux > 0.001 .or. sza < 1.85) then
         call etrans
       else
         uflx(:,:) = 0.0
@@ -222,4 +222,4 @@
 
       return
 
-    end
+    end subroutine glow

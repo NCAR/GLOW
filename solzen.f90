@@ -12,7 +12,16 @@
 ! universal time in seconds, geographic latitude and longitude in degrees.
 
 subroutine solzen (idate, ut, glat, glong, sza)
-  data pi/3.1415926536/
+
+  implicit none
+
+  integer,intent(in) :: idate
+  real,intent(in) :: ut, glat, glong
+  real,intent(out) :: sza
+
+  real,parameter :: pi=3.1415926536
+  real :: rlat, rlong, sdec, srasn, gst, rh, cossza
+
   rlat = glat * pi/180.
   rlong = glong * pi/180.
   call suncor (idate, ut, sdec, srasn, gst)
@@ -20,7 +29,8 @@ subroutine solzen (idate, ut, glat, glong, sza)
   cossza = sin(sdec)*sin(rlat) + cos(sdec)*cos(rlat)*cos(rh)
   sza = acos(cossza) * 180./pi
   return
-end
+
+end subroutine solzen
 
 
 ! Subroutine SUNCOR returns the declination SDEC and right ascension
@@ -29,7 +39,17 @@ end
 ! time GST in radians.  Reference:  C.T. Russell, Geophysical Coordinate Transforms.
 
 subroutine suncor (idate, ut, sdec, srasn, gst)
-  data pi/3.1415926536/
+
+  implicit none
+
+  integer,intent(in) :: idate
+  real,intent(in) :: ut
+  real,intent(out) :: sdec, srasn, gst
+
+  real,parameter :: pi=3.1415926536
+  real :: fday, dj, t, vl, g, slong, obliq, slp, sind, cosd
+  integer :: iyr, iday
+
   fday=ut/86400.
   iyr=idate/1000
   iday=idate-iyr*1000
@@ -39,8 +59,8 @@ subroutine suncor (idate, ut, sdec, srasn, gst)
 ! Note deteriorating accuracy after ~2050 anyway.
 ! Won't work after 2100 due to lack of a leap year.
 
-  if (iyr .ge. 1900) iyr=iyr-1900
-  if (iyr .lt. 50) iyr=iyr+100
+  if (iyr >= 1900) iyr=iyr-1900
+  if (iyr < 50) iyr=iyr+100
 
   dj=365*iyr+(iyr-1)/4+iday+fday-0.5
   t=dj/36525.
@@ -54,5 +74,7 @@ subroutine suncor (idate, ut, sdec, srasn, gst)
   cosd=sqrt(1.-sind**2)
   sdec=atan(sind/cosd)
   srasn=3.14159-atan2(1./tan(obliq)*sind/cosd,-cos(slp)/cosd)
+
   return
-end
+
+end subroutine suncor

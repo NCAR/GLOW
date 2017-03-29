@@ -109,14 +109,21 @@
     subroutine ssflux (iscale,f107,f107a,xuvfac,wave1,wave2,sflux)
 
       use cglow,only: lmax,data_dir
+
+      implicit none
       save
 
-      dimension wave1(lmax), wave2(lmax), sflux(lmax), &
-                wavel(lmax), waves(lmax), rflux(lmax), uflux(lmax), &
-                scale1(lmax), scale2(lmax), a(lmax), b1(3), b2(3)
+      integer,intent(in) :: iscale
+      real,intent(in) :: f107, f107a, xuvfac
+      real,intent(out) :: wave1(lmax), wave2(lmax), sflux(lmax)
+
+      integer :: l, islast
+      real :: wavel(lmax), waves(lmax), rflux(lmax), uflux(lmax)
+      real :: scale1(lmax), scale2(lmax), a(lmax), b1(3), b2(3), epsil
+      real :: r1, r2, p107
+      character(len=1024) :: filepath
       data epsil/1.0E-6/
       data islast/-1/
-      character(len=1024) :: filepath
 
 ! regression coefficients which reduce to solar min. spectrum:
       data b1/1.0, 0.0138, 0.005/, b2/1.0, 0.59425, 0.3811/
@@ -127,8 +134,8 @@
 
 ! Hinteregger contrast ratio method:
 
-      if (iscale .eq. 0) then
-        if (islast .ne. iscale) then
+      if (iscale == 0) then
+        if (islast /= iscale) then
           filepath = trim(data_dir)//'ssflux_hint.dat'
           open(unit=1,file=filepath,status='old',readonly)
           read(1,*)
@@ -143,16 +150,16 @@
 !
         do l=1,lmax
           sflux(l) = rflux(l) + (r1-1.)*scale1(l) + (r2-1.)*scale2(l)
-          if (sflux(l) .lt. 0.0) sflux(l) = 0.0
-          if (xuvfac .gt. epsil .and. wavel(l).lt.251.0 .and. waves(l).gt.17.0) &
+          if (sflux(l) < 0.0) sflux(l) = 0.0
+          if (xuvfac > epsil .and. wavel(l) < 251.0 .and. waves(l) > 17.0) &
             sflux(l)=sflux(l)*xuvfac
         enddo
       endif
 
 ! EUVAC Method:
 
-      if (iscale .eq. 1) then
-        if (islast .ne. iscale) then
+      if (iscale == 1) then
+        if (islast /= iscale) then
           filepath = trim(data_dir)//'ssflux_euvac.dat'
           open(unit=1,file=filepath,status='old',readonly)
           read(1,*)
@@ -166,16 +173,16 @@
 
         do l=1,lmax
           sflux(l) = rflux(l) * (1. + a(l)*(p107-80.))
-          if (sflux(l) .lt. 0.1*rflux(l)) sflux(l) = 0.1*rflux(l)
-          if (xuvfac .gt. epsil .and. wavel(l).lt.51.0 .and. waves(l).gt.17.0) &
+          if (sflux(l) < 0.1*rflux(l)) sflux(l) = 0.1*rflux(l)
+          if (xuvfac > epsil .and. wavel(l) < 51.0 .and. waves(l) > 17.0) &
             sflux(l)=sflux(l)*xuvfac
         enddo
       endif
 
 ! User-supplied data:
 
-      if (iscale .eq. 2) then
-        if (islast .ne. iscale) then
+      if (iscale == 2) then
+        if (islast /= iscale) then
           filepath = trim(data_dir)//'ssflux_user.dat'
           open(unit=1,file=filepath,status='old',readonly)
           read(1,*)
@@ -189,15 +196,15 @@
         enddo
       endif
 
-! Fill wavelength arrays, substitute in H Lyman-alpha if provided:
+! Fill wavelength arrays:
 
       do l=1,lmax
         wave1(l) = wavel(l)
-        wave2(L) = waves(l)
+        wave2(l) = waves(l)
       enddo
 
       islast=iscale
 
       return
 
-    end
+    end subroutine ssflux

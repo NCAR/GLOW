@@ -9,7 +9,7 @@ software ("Software") for research, academic, and non-profit purposes
 2. Basis.  This software was written by Stanley C. Solomon and colleagues, 
 as noted in the individual files.  Some of the routines are based on 
 source code obtained from a variety of sources, including the 2-stream 
-electron transport algorithm by A. F. Nagy and P. M. Banks,a nd geomagnetic
+electron transport algorithm by A. F. Nagy and P. M. Banks, and geomagnetic
 field specifications from the International Reference Ionosphere.
 
 3. Restrictions and Use. 

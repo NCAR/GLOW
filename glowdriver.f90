@@ -4,9 +4,11 @@ program glowdriver
 ! Academic Research License Agreement contained in the file glowlicense.txt.
 ! For more information see the file glow.txt.
 
-! Stan Solomon and Ben Foster, 1/15
-! Stan Solomon, 12/15, 1/16
-! Stan Solomon, 3/16, MPI parallel version
+! Version 0.98, 1/2017
+
+! Stan Solomon and Ben Foster, 1/2015
+! Stan Solomon, 12/2015, 1/2016
+! Stan Solomon, 3/2016, MPI parallel version
 
 ! Main multi-processor driver for the GLOW model.
 ! Uses TIE-GCM history files or MSIS/IRI for input.
@@ -171,7 +173,7 @@ program glowdriver
     nlat = nlat_tgcm
     nlon = nlon_tgcm
   else
-    jmax = 86
+    jmax = 102
     nlev = jmax
     nlat = nlat_msis
     nlon = nlon_msis
