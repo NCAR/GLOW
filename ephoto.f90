@@ -88,7 +88,7 @@ subroutine ephoto
             rion(lmax,nmaj,jmax)
 
   real,parameter :: signo = 2.0e-18
-  integer,save :: ifirst=1
+  integer :: ifirst=1
   integer :: l,n,k,i,j,m,m1,m2
   real :: aa,bb,fac,e1,e2,y,r1,r2
   character(len=1024) :: filepath
@@ -115,7 +115,7 @@ subroutine ephoto
     ifirst = 0
 
     filepath = trim(data_dir)//'ephoto_xn2.dat'
-    open(unit=1,file=filepath,status='old',readonly)
+    open(unit=1,file=filepath,status='old',action='read')
     read(1,*)
     read(1,*)
     read(1,*)
@@ -126,7 +126,7 @@ subroutine ephoto
     close(1)
 
     filepath = trim(data_dir)//'ephoto_xo2.dat'
-    open(unit=1,file=filepath,status='old',readonly)
+    open(unit=1,file=filepath,status='old',action='read')
     read(1,*)
     read(1,*)
     read(1,*)
@@ -137,7 +137,7 @@ subroutine ephoto
     close(1)
 
     filepath = trim(data_dir)//'ephoto_xo.dat'
-    open(unit=1,file=filepath,status='old',readonly)
+    open(unit=1,file=filepath,status='old',action='read')
     read(1,*)
     read(1,*)
     read(1,*)

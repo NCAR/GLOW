@@ -1,3 +1,16 @@
+GLOW version 0.981 release notes, Stan Solomon, 6/2017
+
+Very minor update to v 0.98, implemented to facilitate using GNU gfortran:
+   Changed all open statements to use action='read' instead of 'readonly'
+   Commented out two lines from nrlmsise00.f; changed 0 to 0.
+   Replaced sind and cosd functions in snoem.f90, and general cleanup.
+   Corrected rcolum.f90 to call chap with pi-chi when chi>pi/2.
+   Added a trap to etrans.f90 to assure no calculation when j=1.
+   Zeroed out all arrays in cglow.f90.
+   None of these changes should have any effect on results.
+
+-----------------------------------------------------
+
 GLOW version 0.98 release notes, Stan Solomon, 3/2017
 
 See Quickstart.txt for very basic instructions
@@ -46,7 +59,7 @@ Other significant changes:
    The quartic equation solver formerly used by GCHEM to calculate electron
 density has been abandoned because it produced minor errors and could not
 be verified.  Instead, a simple iterative method is used, which turns out
-to be more accurate and equally fast.  Thanks to Matt Hirsch for identifying
+to be more accurate and equally fast.  Thanks to Michael Hirsch for identifying
 this problem.
 
    The high-energy electron precipitation example (hexexample) is no longer

@@ -5,7 +5,7 @@ C     NRLMSISE-00
 C     -----------
 C        Neutral Atmosphere Empirical Model from the surface to lower
 C        exosphere
-C
+C                   -- Quick Fixes for gfortran compatibility, SCS, 2017
 C        NEW FEATURES:
 C          *Extensive satellite drag database used in model generation
 C          *Revised O2 (and O) in lower thermosphere
@@ -276,7 +276,7 @@ C
    10 CONTINUE
       GOTO 90
    50 CONTINUE
-      DD=DENSM(ALT,1.,0,TZ,MN3,ZN3,TN3,TGN3,MN2,ZN2,TN2,TGN2)                
+      DD=DENSM(ALT,1.,0.,TZ,MN3,ZN3,TN3,TGN3,MN2,ZN2,TN2,TGN2) ! 0. SCS 2017
       T(2)=TZ
    90 CONTINUE
       ALAST=ALT
@@ -1673,8 +1673,8 @@ C          MSISE-00 01-FEB-02
       COMMON/DATIM7/ISDATE(3),ISTIME(2),NAME(2)
       COMMON/METSEL/IMR
       DATA IMR/0/
-      DATA ISDATE/'01-F','EB-0','2   '/,ISTIME/'15:4','9:27'/
-      DATA NAME/'MSIS','E-00'/
+C     DATA ISDATE/'01-F','EB-0','2   '/,ISTIME/'15:4','9:27'/ ! cout, SCS, 2017
+C     DATA NAME/'MSIS','E-00'/                                ! cout, SCS, 2017
 C         TEMPERATURE
       DATA PT1/
      *  9.86573E-01, 1.62228E-02, 1.55270E-02,-1.04323E-01,-3.75801E-03,

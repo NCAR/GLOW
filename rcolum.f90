@@ -9,6 +9,7 @@
 ! boundary.  If grazing height is below lower boundary of atmosphere
 ! supplied, column density is set to 1.0e30.
 ! Stan Solomon, 2016: refactored for f90.
+! Stan Solomon, 2017: corrected chi to pi-chi at line 79.  Note this has no effect.
 
 ! Calculates the column density ZCOL for each species ZMAJ above height
 ! ZZ at zenith angle CHI.  Calls subroutine VCD to calculate the
@@ -31,7 +32,7 @@
       real,intent(out) :: zcol(nmaj,jmax), zvcd(nmaj,jmax)
 
       integer,parameter :: nm=3
-      real,parameter :: pi=3.1415926535
+      real,parameter :: pi=3.1415926536
       real,parameter :: re=6.37e8
 
       integer :: i, j, k
@@ -75,7 +76,7 @@
             enddo
             do i=1,nmaj
               zcol(i,j) = 2. * zcg(i) * chap(pi/2.,ghz,tng,i) &
-                        - zvcd(i,j) * chap(chi,zz(j),tn(j),i)
+                        - zvcd(i,j) * chap(pi-chi,zz(j),tn(j),i)
             enddo
           endif
         enddo
@@ -95,7 +96,7 @@
       integer,intent(in) :: i
 
       integer,parameter ::  nmaj=3
-      real,parameter :: pi=3.1415926535
+      real,parameter :: pi=3.1415926536
       real,parameter :: re=6.37e8
       real,parameter :: g=978.1
 

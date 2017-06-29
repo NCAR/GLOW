@@ -137,7 +137,7 @@
       if (iscale == 0) then
         if (islast /= iscale) then
           filepath = trim(data_dir)//'ssflux_hint.dat'
-          open(unit=1,file=filepath,status='old',readonly)
+          open(unit=1,file=filepath,status='old',action='read')
           read(1,*)
           do l=lmax,1,-1
             read(1,*) waves(l),wavel(l),rflux(l),scale1(l),scale2(l)
@@ -161,7 +161,7 @@
       if (iscale == 1) then
         if (islast /= iscale) then
           filepath = trim(data_dir)//'ssflux_euvac.dat'
-          open(unit=1,file=filepath,status='old',readonly)
+          open(unit=1,file=filepath,status='old',action='read')
           read(1,*)
           do l=lmax,1,-1
             read(1,*) waves(l),wavel(l),rflux(l),a(l)
@@ -184,7 +184,7 @@
       if (iscale == 2) then
         if (islast /= iscale) then
           filepath = trim(data_dir)//'ssflux_user.dat'
-          open(unit=1,file=filepath,status='old',readonly)
+          open(unit=1,file=filepath,status='old',action='read')
           read(1,*)
           do l=lmax,1,-1
             read(1,*) waves(l),wavel(l),uflux(l)

@@ -262,25 +262,27 @@
 !
 ! Cascade production:
 !
-      do k = 1, j-1
-        ll = j - k
-        produa(:)=0.
-        prodda(:)=0.
-        do n = 1, nmaj
+      if (j > 1) then
+        do k = 1, j-1
+          ll = j - k
+          produa(:)=0.
+          prodda(:)=0.
+          do n = 1, nmaj
+            do i=1,jmax
+              produa(i) = produa(i) &
+                         + zmaj(n,i) * (siga(n,k,j)*pin(n,j)*phidwn(i) &
+                         + (1. - pin(n,j))*siga(n,k,j)*phiup(i))
+              prodda(i) = prodda(i) &
+                         + zmaj(n,i) * (siga(n,k,j)*pin(n,j)*phiup(i) &
+                         + (1. - pin(n,j))*siga(n,k,j)*phidwn(i))
+            enddo
+          enddo
           do i=1,jmax
-            produa(i) = produa(i) &
-                       + zmaj(n,i) * (siga(n,k,j)*pin(n,j)*phidwn(i) &
-                       + (1. - pin(n,j))*siga(n,k,j)*phiup(i))
-            prodda(i) = prodda(i) &
-                       + zmaj(n,i) * (siga(n,k,j)*pin(n,j)*phiup(i) &
-                       + (1. - pin(n,j))*siga(n,k,j)*phidwn(i))
+            produp(i,ll) = produp(i,ll) + produa(i) * rmusin
+            prodwn(i,ll) = prodwn(i,ll) + prodda(i) * rmusin
           enddo
         enddo
-        do i=1,jmax
-          produp(i,ll) = produp(i,ll) + produa(i) * rmusin
-          prodwn(i,ll) = prodwn(i,ll) + prodda(i) * rmusin
-        enddo
-      enddo
+      endif
       kk = j - 1
       if (kk > 0) then
         do i = 1, jmax

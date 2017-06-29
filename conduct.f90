@@ -122,7 +122,7 @@
 
 ! Calculate Pederson and Hall conductivity using the TIE-GCM formulation:
 ! NOTE: multiplied by 1.e6 to convert densities to m^-3, so that
-! conductivities are in Sieverts/meter, a.k.a. mhos.
+! conductivities are in Siemens/meter, a.k.a. mhos.
 
 
       PedCond = (1.e6*qe/Bmagn) *                                 &

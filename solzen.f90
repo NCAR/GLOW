@@ -73,7 +73,7 @@ subroutine suncor (idate, ut, sdec, srasn, gst)
   sind=sin(obliq)*sin(slp)
   cosd=sqrt(1.-sind**2)
   sdec=atan(sind/cosd)
-  srasn=3.14159-atan2(1./tan(obliq)*sind/cosd,-cos(slp)/cosd)
+  srasn=pi-atan2(1./tan(obliq)*sind/cosd,-cos(slp)/cosd)
 
   return
 

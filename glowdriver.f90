@@ -4,7 +4,7 @@ program glowdriver
 ! Academic Research License Agreement contained in the file glowlicense.txt.
 ! For more information see the file glow.txt.
 
-! Version 0.98, 1/2017
+! Version 0.981, 6/2017
 
 ! Stan Solomon and Ben Foster, 1/2015
 ! Stan Solomon, 12/2015, 1/2016

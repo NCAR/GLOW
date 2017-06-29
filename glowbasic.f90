@@ -4,7 +4,7 @@ program glowbasic
 ! Academic Research License Agreement contained in the file glowlicense.txt.
 ! For more information see the file glow.txt.
 
-! Version 0.98, 1/2017
+! Version 0.981, 6/2017
 
 ! Adapted from glowdriver by Stan Solomon, 2/2016
 

@@ -4,6 +4,7 @@ Copy all the files and sub-directories into a directory, or,
   copy the file glowv0.98.tar to a directory and tar -xf glowv0.98.tar
 While in that directory:
   cp Makefile.glowbasic Makefile
+    (or, cp Makefile.glowbasic.gfort Makefile if using GNU gfortran)
   gmake
 Run the glowbasic driver with default dayglow inputs:
   glow.exe < in.basic.day > test.basic.day

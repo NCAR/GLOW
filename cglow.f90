@@ -4,10 +4,11 @@ module cglow
 ! Academic Research License Agreement contained in the file glowlicense.txt.
 ! For more information see the file glow.txt.
 
-! Version 0.98, 1/2017
+! Version 0.981, 6/2017
 
 ! Stan Solomon and Ben Foster, 1/2015
 ! Stan Solomon, 1/2016, 3/2016, consolidated with cxglow
+! Stan Solomon, 6/2017, zeroed out arrays
 
 ! CGLOW Defines array dimensions and use-associated variables for the GLOW model.
 ! Replaces the header file glow.h and common blocks /CGLOW/, /CXSECT/, and /CXPARS/
@@ -101,6 +102,8 @@ module cglow
 
   subroutine cglow_init
 
+! Allocate variable arrays:
+
     allocate        &
       (zz   (jmax), &
        zo   (jmax), &
@@ -185,6 +188,71 @@ module cglow
        tb  (nei,nmaj), &
        gams(nei,nmaj), &
        gamb(nei,nmaj))
+
+! Zero all allocated variable arrays:
+
+       zz   (:)     =0.
+       zo   (:)     =0.
+       zn2  (:)     =0.
+       zo2  (:)     =0.
+       zno  (:)     =0.
+       zns  (:)     =0.
+       znd  (:)     =0.
+       zrho (:)     =0.
+       ze   (:)     =0.
+       ztn  (:)     =0.
+       zti  (:)     =0.
+       zte  (:)     =0.
+       eheat(:)     =0.
+       tez  (:)     =0.
+       tei  (:)     =0.
+       tpi  (:)     =0.
+       tir  (:)     =0.
+       ecalc(:)     =0.
+       zxden(:,:)   =0.
+       zeta(:,:)    =0.
+       zceta(:,:,:) =0.
+       zlbh(:,:)    =0.
+       phitop(:)    =0.
+       ener  (:)    =0.
+       del   (:)    =0.
+       wave1(:)     =0.
+       wave2(:)     =0.
+       sflux(:)     =0.
+       pespec(:,:)  =0.
+       sespec(:,:)  =0.
+       uflx  (:,:)  =0.
+       dflx  (:,:)  =0.
+       zmaj(:,:)    =0.
+       zcol(:,:)    =0.
+       pia (:,:)    =0.
+       sion(:,:)    =0.
+       aglw  (:,:,:)=0.
+       photoi(:,:,:)=0.
+       photod(:,:,:)=0.
+       phono(:,:)   =0.
+       sigs(:,:)    =0.
+       pe  (:,:)    =0.
+       pin (:,:)    =0.
+       sigex(:,:,:) =0.
+       sigix(:,:,:) =0.
+       siga(:,:,:)  =0.
+       sec (:,:,:)  =0.
+       iimaxx(:)    =0.
+       ww  (:,:)    =0.
+       ao  (:,:)    =0.
+       omeg(:,:)    =0.
+       anu (:,:)    =0.
+       bb  (:,:)    =0.
+       auto(:,:)    =0.
+       thi (:,:)    =0.
+       ak  (:,:)    =0.
+       aj  (:,:)    =0.
+       ts  (:,:)    =0.
+       ta  (:,:)    =0.
+       tb  (:,:)    =0.
+       gams(:,:)    =0.
+       gamb(:,:)    =0.
 
   end subroutine cglow_init
 
